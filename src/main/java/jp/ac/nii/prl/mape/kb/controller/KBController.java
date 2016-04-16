@@ -62,6 +62,23 @@ public class KBController {
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
 		}
 		
+		String cmd = String.format("main put %s %s.json", bx, bx);
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec(cmd);
+		} catch (IOException e) {
+			e.printStackTrace();
+			HttpHeaders httpHeaders = new HttpHeaders();
+			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		try {
+			p.waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			HttpHeaders httpHeaders = new HttpHeaders();
+			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		// create response
 		HttpHeaders httpHeaders = new HttpHeaders();
 		return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
