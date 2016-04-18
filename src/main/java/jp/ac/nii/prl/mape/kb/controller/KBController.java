@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +18,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.ac.nii.prl.mape.kb.properties.HaskellProperties;
+
 @RestController
 @Component
 @RequestMapping("/kb")
 public class KBController {
+	
+	private final HaskellProperties haskellProperties;
+	
+	@Autowired
+	public KBController(HaskellProperties haskellProperties) {
+		this.haskellProperties = haskellProperties;
+	}
 
 	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
 	public String get(@PathVariable String bx) {
 		String view = null;
-		String cmd = String.format("main get %s %s.json", bx, bx);
+		String cmd = String.format("%s get %s %s.json", haskellProperties.getExecutable(), bx, bx);
 		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
@@ -62,7 +72,7 @@ public class KBController {
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
 		}
 		
-		String cmd = String.format("main put %s %s.json", bx, bx);
+		String cmd = String.format("%s put %s %s.json", haskellProperties.getExecutable(), bx, bx);
 		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
