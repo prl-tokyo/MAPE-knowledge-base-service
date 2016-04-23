@@ -34,7 +34,7 @@ public class KBController {
 
 	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
 	public String get(@PathVariable String bx) {
-		String view = null;
+		StringBuilder view = new StringBuilder();
 		String cmd = String.format("%s get %s %s.json", haskellProperties.getExecutable(), bx, bx);
 		Process p = null;
 		try {
@@ -53,12 +53,12 @@ public class KBController {
 		try {
 			List<String> allLines = Files.readAllLines(path);
 			for (String line:allLines)
-				view = view + "\n" + line;
+				view.append(line);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return "ERROR: could not read view";
 		}
-		return view;
+		return view.toString();
 	}
 	
 	@RequestMapping(value="put/{bx}", method=RequestMethod.POST)
