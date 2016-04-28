@@ -13,24 +13,12 @@ public class HaskellProperties {
 	@NotEmpty
 	@Valid
 	private String executable = "";
-
-	@NotEmpty
-	@Valid
-	private String sourcePath;
 	
 	public String getExecutable() {
 		return executable;
 	}
 
-	public String getSourcePath() {
-		return sourcePath;
-	}
-
 	public void setExecutable(String executable) {
 		this.executable = executable;
-	}
-
-	public void setSourcePath(String sourcePath) {
-		this.sourcePath = sourcePath;
 	}
 }

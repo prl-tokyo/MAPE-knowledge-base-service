@@ -32,10 +32,16 @@ public class KBController {
 		this.haskellProperties = haskellProperties;
 	}
 
-	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
-	public String get(@PathVariable String bx) {
+	@RequestMapping(value="get/{bx}/{param}", method=RequestMethod.GET)
+	public String get(@PathVariable String bx, @PathVariable String param) {
 		StringBuilder view = new StringBuilder();
-		String cmd = String.format("%s get %s %s.json", haskellProperties.getExecutable(), bx, bx);
+		System.out.println(param);
+		String cmd = String.format("%s get %s %s.json %s", 
+				haskellProperties.getExecutable(), 
+				bx, 
+				bx, 
+				param);
+		System.out.println(cmd);
 		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
@@ -96,7 +102,7 @@ public class KBController {
 	
 	@RequestMapping(value="source", method=RequestMethod.POST)
 	public ResponseEntity<?> updateSource(@RequestBody String source) {
-		Path path = Paths.get(String.format("%ssource.json", haskellProperties.getSourcePath()));
+		Path path = Paths.get("source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
