@@ -93,4 +93,19 @@ public class KBController {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
 	}
+	
+	@RequestMapping(value="source", method=RequestMethod.POST)
+	public ResponseEntity<?> updateSource(@RequestBody String source) {
+		Path path = Paths.get(String.format("%ssource.json", haskellProperties.getSourcePath()));
+		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+			writer.write(source);
+		} catch (IOException ex) {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
+		}
+		
+		// create response
+		HttpHeaders httpHeaders = new HttpHeaders();
+		return new ResponseEntity<>(null, httpHeaders, HttpStatus.OK);
+	}
 }
