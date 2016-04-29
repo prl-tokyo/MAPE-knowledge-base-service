@@ -36,9 +36,10 @@ public class KBController {
 	public String get(@PathVariable String bx, @PathVariable String param) {
 		StringBuilder view = new StringBuilder();
 		System.out.println(param);
-		String cmd = String.format("%s get %s %s.json %s", 
+		String cmd = String.format("%s get %s %s/%s.json %s", 
 				haskellProperties.getExecutable(), 
 				bx, 
+				haskellProperties.getJsonPath(),
 				bx, 
 				param);
 		System.out.println(cmd);
@@ -55,7 +56,7 @@ public class KBController {
 			e.printStackTrace();
 			return "ERROR: could not complete transformation";
 		}
-		Path path = Paths.get(String.format("%s.json",  bx));
+		Path path = Paths.get(String.format("%s/%s.json",  haskellProperties.getJsonPath(), bx));
 		try {
 			List<String> allLines = Files.readAllLines(path);
 			for (String line:allLines)
@@ -72,7 +73,7 @@ public class KBController {
 			@PathVariable String param, 
 			@RequestBody String view) {
 		
-		Path path = Paths.get(String.format("%s.json", bx));
+		Path path = Paths.get(String.format("%s/%s.json", haskellProperties.getJsonPath(), bx));
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 		    writer.write(view);
 		} catch (IOException ex) {
@@ -80,9 +81,10 @@ public class KBController {
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
 		}
 		
-		String cmd = String.format("%s put %s %s.json %s", 
+		String cmd = String.format("%s put %s %s/%s.json %s", 
 				haskellProperties.getExecutable(), 
-				bx, 
+				bx,
+				haskellProperties.getJsonPath(),
 				bx, 
 				param);
 		System.out.println(cmd);
@@ -109,7 +111,7 @@ public class KBController {
 	
 	@RequestMapping(value="source", method=RequestMethod.POST)
 	public ResponseEntity<?> updateSource(@RequestBody String source) {
-		Path path = Paths.get("source.json");
+		Path path = Paths.get(haskellProperties.getJsonPath() + "source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
