@@ -14,11 +14,21 @@ public class HaskellProperties {
 	@Valid
 	private String executable = "";
 	
+	private String jsonPath = "";
+	
 	public String getExecutable() {
 		return executable;
 	}
 
+	public String getJsonPath() {
+		return jsonPath;
+	}
+
 	public void setExecutable(String executable) {
 		this.executable = executable;
+	}
+
+	public void setJsonPath(String jsonPath) {
+		this.jsonPath = jsonPath;
 	}
 }
