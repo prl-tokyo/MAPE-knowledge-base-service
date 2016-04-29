@@ -67,8 +67,10 @@ public class KBController {
 		return view.toString();
 	}
 	
-	@RequestMapping(value="put/{bx}", method=RequestMethod.POST)
-	public ResponseEntity<?> put(@PathVariable String bx, @RequestBody String view) {
+	@RequestMapping(value="put/{bx}/{param}", method=RequestMethod.POST)
+	public ResponseEntity<?> put(@PathVariable String bx, 
+			@PathVariable String param, 
+			@RequestBody String view) {
 		
 		Path path = Paths.get(String.format("%s.json", bx));
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
@@ -78,7 +80,12 @@ public class KBController {
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
 		}
 		
-		String cmd = String.format("%s put %s %s.json", haskellProperties.getExecutable(), bx, bx);
+		String cmd = String.format("%s put %s %s.json %s", 
+				haskellProperties.getExecutable(), 
+				bx, 
+				bx, 
+				param);
+		System.out.println(cmd);
 		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
