@@ -111,7 +111,7 @@ public class KBController {
 	
 	@RequestMapping(value="source", method=RequestMethod.POST)
 	public ResponseEntity<?> updateSource(@RequestBody String source) {
-		Path path = Paths.get(haskellProperties.getJsonPath() + "source.json");
+		Path path = Paths.get("source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
