@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ public class KBController {
 	
 	private final HaskellProperties haskellProperties;
 	
+	private static final Logger logger = LoggerFactory.getLogger(KBController.class);
+	
 	@Autowired
 	public KBController(HaskellProperties haskellProperties) {
 		this.haskellProperties = haskellProperties;
@@ -34,6 +38,7 @@ public class KBController {
 
 	@RequestMapping(value="get/{bx}/{param}", method=RequestMethod.GET)
 	public String get(@PathVariable String bx, @PathVariable String param) {
+		logger.info(String.format("Running GET transformation %s with param %s", bx, param));
 		StringBuilder view = new StringBuilder();
 		System.out.println(param);
 		String cmd = String.format("%s get %s %s/%s.json %s", 
@@ -42,29 +47,34 @@ public class KBController {
 				haskellProperties.getJsonPath(),
 				bx, 
 				param);
-		System.out.println(cmd);
+		logger.debug(String.format("Executing: %s", cmd));
 		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			logger.trace(e.getStackTrace().toString());
 			return "ERROR: could not execute transformation";
 		}
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			logger.trace(e.getStackTrace().toString());
 			return "ERROR: could not complete transformation";
 		}
+		logger.info("Transformation completed");
 		Path path = Paths.get(String.format("%s/%s.json",  haskellProperties.getJsonPath(), bx));
 		try {
 			List<String> allLines = Files.readAllLines(path);
 			for (String line:allLines)
 				view.append(line);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			logger.trace(e.getStackTrace().toString());
 			return "ERROR: could not read view";
 		}
+		logger.info("View read");
 		return view.toString();
 	}
 	
