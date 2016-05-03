@@ -83,6 +83,8 @@ public class KBController {
 			@PathVariable String param, 
 			@RequestBody String view) {
 		
+		logger.info(String.format("Running PUT transformation %s with param %s", bx, param));
+		
 		Path path = Paths.get(String.format("%s/%s.json", haskellProperties.getJsonPath(), bx));
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 		    writer.write(view);
@@ -102,17 +104,21 @@ public class KBController {
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			logger.trace(e.getStackTrace().toString());
 			HttpHeaders httpHeaders = new HttpHeaders();
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			logger.trace(e.getStackTrace().toString());
 			HttpHeaders httpHeaders = new HttpHeaders();
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		
+		logger.info(String.format("PUT transformation %s completed", bx));
 		
 		// create response
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -121,13 +127,20 @@ public class KBController {
 	
 	@RequestMapping(value="source", method=RequestMethod.POST)
 	public ResponseEntity<?> updateSource(@RequestBody String source) {
+		
+		logger.info("Updating source");
+		
 		Path path = Paths.get(haskellProperties.getJsonPath() + "source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
+			logger.error(ex.getMessage());
+			logger.trace(ex.getStackTrace().toString());
 			HttpHeaders httpHeaders = new HttpHeaders();
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
 		}
+		
+		logger.info("Source updated");
 		
 		// create response
 		HttpHeaders httpHeaders = new HttpHeaders();
