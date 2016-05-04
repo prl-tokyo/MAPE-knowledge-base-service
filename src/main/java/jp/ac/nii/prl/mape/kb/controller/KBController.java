@@ -87,6 +87,11 @@ public class KBController {
 		return view.toString();
 	}
 	
+	@RequestMapping(value="put/{bx}", method=RequestMethod.POST)
+	public ResponseEntity<?> putNoParam(@PathVariable String bx, @RequestBody String view) {
+		return put(bx, "nothing", view);
+	}
+	
 	@RequestMapping(value="put/{bx}/{param}", method=RequestMethod.POST)
 	public ResponseEntity<?> put(@PathVariable String bx, 
 			@PathVariable String param, 
