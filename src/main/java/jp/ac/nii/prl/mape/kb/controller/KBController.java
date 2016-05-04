@@ -76,7 +76,7 @@ public class KBController {
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			logger.trace(e.getStackTrace().toString());
-			return "ERROR: could not read view";
+			throw new FileReadException("Could not read view");
 		}
 		logger.info("View read");
 		return view.toString();
