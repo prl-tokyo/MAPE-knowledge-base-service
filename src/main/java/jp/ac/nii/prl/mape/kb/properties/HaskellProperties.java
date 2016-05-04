@@ -14,6 +14,8 @@ public class HaskellProperties {
 	@Valid
 	private String executable = "";
 	
+	@NotEmpty
+	@Valid
 	private String jsonPath = "";
 	
 	public String getExecutable() {
