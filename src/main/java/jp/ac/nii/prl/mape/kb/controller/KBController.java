@@ -36,6 +36,11 @@ public class KBController {
 		this.haskellProperties = haskellProperties;
 	}
 
+	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
+	public String getNoParam(@PathVariable String bx) {
+		return get(bx, "nothing");
+	}
+	
 	@RequestMapping(value="get/{bx}/{param}", method=RequestMethod.GET)
 	public String get(@PathVariable String bx, @PathVariable String param) {
 		logger.info(String.format("Running GET transformation %s with param %s", bx, param));
