@@ -54,14 +54,18 @@ public class KBController {
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			logger.trace(e.getStackTrace().toString());
-			return "ERROR: could not execute transformation";
+			throw new TransformationException("Could not execute transformation");
 		}
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage());
 			logger.trace(e.getStackTrace().toString());
-			return "ERROR: could not complete transformation";
+			throw new TransformationException("Transformation failed");
+		}
+		if (p.exitValue() != 0) {
+			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
+			throw new TransformationException("Transformation failed");
 		}
 		logger.info("Transformation completed");
 		Path path = Paths.get(String.format("%s/%s.json",  haskellProperties.getJsonPath(), bx));
