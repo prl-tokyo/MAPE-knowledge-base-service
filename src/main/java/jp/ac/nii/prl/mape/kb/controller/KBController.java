@@ -132,6 +132,11 @@ public class KBController {
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
+		if (p.exitValue() != 0) {
+			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
+			throw new TransformationException("Transformation failed");
+		}
+		
 		logger.info(String.format("PUT transformation %s completed", bx));
 		
 		// create response
