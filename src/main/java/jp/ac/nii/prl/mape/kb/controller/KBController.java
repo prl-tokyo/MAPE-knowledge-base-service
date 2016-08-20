@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.ac.nii.prl.mape.kb.bx.BXRunner;
 import jp.ac.nii.prl.mape.kb.properties.HaskellProperties;
 
 @RestController
@@ -28,12 +28,14 @@ import jp.ac.nii.prl.mape.kb.properties.HaskellProperties;
 public class KBController {
 	
 	private final HaskellProperties haskellProperties;
+	private final BXRunner bxRunner;
 	
 	private static final Logger logger = LoggerFactory.getLogger(KBController.class);
 	
 	@Autowired
-	public KBController(HaskellProperties haskellProperties) {
+	public KBController(HaskellProperties haskellProperties, BXRunner bxRunner) {
 		this.haskellProperties = haskellProperties;
+		this.bxRunner = bxRunner;
 	}
 
 	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
@@ -43,48 +45,34 @@ public class KBController {
 	
 	@RequestMapping(value="get/{bx}/{param}", method=RequestMethod.GET)
 	public String get(@PathVariable String bx, @PathVariable String param) {
+		String view = "";
+		switch(bx) {
+		case "failure":
+			bxGet("autoscalingFailure", param);
+			view = bxGet(bx, param);
+			break;
+		case "autoscaling":
+			view = bxGet(bx, param);
+			break;
+		case "firewall":
+			view = bxGet(bx, param);
+			break;
+		default:
+			throw new TransformationException(String.format("Cannot run transformation %s", bx));
+		}
+		return view;
+	}
+	
+	public String bxGet(String bx, String param) {
 		logger.info(String.format("Running GET transformation %s with param %s", bx, param));
-		StringBuilder view = new StringBuilder();
-		System.out.println(param);
-		String cmd = String.format("%s get %s %s/%s.json %s", 
-				haskellProperties.getExecutable(), 
-				bx, 
-				haskellProperties.getJsonPath(),
-				bx, 
-				param);
-		logger.debug(String.format("Executing: %s", cmd));
-		Process p = null;
+		String view;
 		try {
-			p = Runtime.getRuntime().exec(cmd);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			logger.trace(e.getStackTrace().toString());
-			throw new TransformationException("Could not execute transformation");
+			view = bxRunner.get(bx,  param, 
+					haskellProperties.getExecutable(), haskellProperties.getJsonPath());
+		} catch (IOException | InterruptedException e) {
+			throw new TransformationException("Error in GET transformation");
 		}
-		try {
-			p.waitFor();
-		} catch (InterruptedException e) {
-			logger.error(e.getMessage());
-			logger.trace(e.getStackTrace().toString());
-			throw new TransformationException("Transformation failed");
-		}
-		if (p.exitValue() != 0) {
-			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
-			throw new TransformationException("Transformation failed");
-		}
-		logger.info("Transformation completed");
-		Path path = Paths.get(String.format("%s/%s.json",  haskellProperties.getJsonPath(), bx));
-		try {
-			List<String> allLines = Files.readAllLines(path);
-			for (String line:allLines)
-				view.append(line);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			logger.trace(e.getStackTrace().toString());
-			throw new FileReadException("Could not read view");
-		}
-		logger.info("View read");
-		return view.toString();
+		return view;
 	}
 	
 	@RequestMapping(value="put/{bx}", method=RequestMethod.POST)
@@ -94,54 +82,54 @@ public class KBController {
 	
 	@RequestMapping(value="put/{bx}/{param}", method=RequestMethod.POST)
 	public ResponseEntity<?> put(@PathVariable String bx, 
-			@PathVariable String param, 
+			@PathVariable String param,
 			@RequestBody String view) {
 		
-		logger.info(String.format("Running PUT transformation %s with param %s", bx, param));
+		boolean res = false;
 		
-		Path path = Paths.get(String.format("%s/%s.json", haskellProperties.getJsonPath(), bx));
-		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-		    writer.write(view);
-		} catch (IOException ex) {
-			HttpHeaders httpHeaders = new HttpHeaders();
-			return new ResponseEntity<>(null, httpHeaders, HttpStatus.FORBIDDEN);
+		switch(bx) {
+		case "failure":
+			res = bxPut(bx, param, view);
+			break;
+		case "autoscaling":
+			res = bxPut(bx, param, view);
+			if (!res) break;
+			res = bxPut("autoscalingFailure", param, "");
+			break;
+		case "firewall":
+			res = bxPut(bx, param, view);
+			break;
+		default:
+			logger.error(String.format("Can't perform put transformation %s", bx));
+			res = false;
+			break;
 		}
 		
-		String cmd = String.format("%s put %s %s/%s.json %s", 
-				haskellProperties.getExecutable(), 
-				bx,
-				haskellProperties.getJsonPath(),
-				bx, 
-				param);
-		System.out.println(cmd);
-		Process p = null;
-		try {
-			p = Runtime.getRuntime().exec(cmd);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			logger.trace(e.getStackTrace().toString());
+		if (!res) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		try {
-			p.waitFor();
-		} catch (InterruptedException e) {
-			logger.error(e.getMessage());
-			logger.trace(e.getStackTrace().toString());
-			HttpHeaders httpHeaders = new HttpHeaders();
-			return new ResponseEntity<>(null, httpHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
-		if (p.exitValue() != 0) {
-			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
-			throw new TransformationException("Transformation failed");
-		}
-		
-		logger.info(String.format("PUT transformation %s completed", bx));
 		
 		// create response
 		HttpHeaders httpHeaders = new HttpHeaders();
 		return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+	}
+	
+	public boolean bxPut(String bx, String param, String view) {
+		
+		logger.info(String.format("Running PUT transformation %s with param %s", bx, param));
+		
+		if (bx == "autoscalingFailure") {
+			
+		}
+		
+		if (!bxRunner.put(bx, view, param, haskellProperties.getExecutable(), haskellProperties.getJsonPath())) {
+			return false;
+		}
+		
+		logger.info(String.format("PUT transformation %s completed", bx));
+		
+		return true;
 	}
 	
 	@RequestMapping(value="source", method=RequestMethod.POST)
