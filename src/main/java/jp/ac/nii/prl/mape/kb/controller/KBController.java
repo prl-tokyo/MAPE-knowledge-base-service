@@ -40,6 +40,7 @@ public class KBController {
 
 	@RequestMapping(value="get/{bx}", method=RequestMethod.GET)
 	public String getNoParam(@PathVariable String bx) {
+		logger.info("Got GET request for BX " + bx);
 		return get(bx, "nothing");
 	}
 	
@@ -51,7 +52,7 @@ public class KBController {
 			bxGet("autoscalingFailure", param);
 			view = bxGet(bx, param);
 			break;
-		case "autoscaling":
+		case "autoScaling":
 			view = bxGet(bx, param);
 			break;
 		case "firewall":
@@ -70,6 +71,7 @@ public class KBController {
 			view = bxRunner.get(bx,  param, 
 					haskellProperties.getExecutable(), haskellProperties.getJsonPath());
 		} catch (IOException | InterruptedException e) {
+			logger.error("Error in GET transformation " + bx);
 			throw new TransformationException("Error in GET transformation");
 		}
 		return view;

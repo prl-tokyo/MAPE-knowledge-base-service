@@ -1,11 +1,16 @@
 package jp.ac.nii.prl.mape.kb.bx;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,36 +34,17 @@ public class BXRunner {
 			}
 		}
 		
-		String source = "";
-		switch(bx) {
-		
-		case "autoscaling": 
-			source = String.format("%s/autoscalingFailure.json", jsonPath);
-			break;
-		case "failure": 
-			source = String.format("%s/autoscalingFailure.json", jsonPath);
-			break;
-		case "firewall": 
-			source = String.format("%s/source.json", jsonPath);
-			break;
-		case "autoscalingFailure":
-			source = String.format("%s/source.json", jsonPath);
-		default:
-			logger.error("Don't know which source to select");
-			break;
-		}
-		
-		String cmd = String.format("%s put %s %s %s/%s.json %s", 
+		String cmd = String.format("%s put %s %s", 
 				executable, 
 				bx,
-				source,
-				jsonPath,
-				bx, 
 				param);
 		System.out.println(cmd);
-		Process p = null;
+		logger.error("Running command " + cmd);
+		ProcessBuilder pb = new ProcessBuilder(executable, "put", bx, param);
+		pb.directory(new File("/Users/lionel/Documents/MAPE-knowledge-base/Haskell"));
+		Process p;
 		try {
-			p = Runtime.getRuntime().exec(cmd);
+			p = pb.start();
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			logger.trace(e.getStackTrace().toString());
@@ -73,7 +59,7 @@ public class BXRunner {
 		}
 		
 		if (p.exitValue() != 0) {
-			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
+			logger.error(String.format("BiGUL program returned %s for BX %s. Aborting.", p.exitValue(), bx));
 			throw new TransformationException("Transformation failed");
 		}
 		return true;
@@ -82,16 +68,19 @@ public class BXRunner {
 	public synchronized String get(String bx, String param, String executable, String jsonPath) throws IOException, InterruptedException {
 		StringBuilder view = new StringBuilder();
 		System.out.println(param);
-		String cmd = String.format("%s get %s %s/%s.json %s", 
+		String cmd = String.format("%s get %s %s", 
 				executable, 
 				bx, 
-				jsonPath,
-				bx, 
 				param);
-		logger.debug(String.format("Executing: %s", cmd));
-		Process p = null;
-		p = Runtime.getRuntime().exec(cmd);
+		logger.info(String.format("Executing: %s", cmd));
+		ProcessBuilder pb = new ProcessBuilder(executable, "get", bx, param);
+		pb.directory(new File("/Users/lionel/Documents/MAPE-knowledge-base/Haskell"));
+		Process p = pb.start();
 		p.waitFor();
+		InputStream is = p.getInputStream();
+		String result = new BufferedReader(new InputStreamReader(is))
+				  .lines().collect(Collectors.joining("\n"));
+		logger.error(result);
 		if (p.exitValue() != 0) {
 			logger.error(String.format("BiGUL program returned %s. Aborting.", p.exitValue()));
 			throw new TransformationException("Transformation failed");
