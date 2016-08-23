@@ -58,6 +58,9 @@ public class KBController {
 		case "firewall":
 			view = bxGet(bx, param);
 			break;
+		case "execution":
+			view = bxGet(bx, param);
+			break;
 		default:
 			throw new TransformationException(String.format("Cannot run transformation %s", bx));
 		}
@@ -93,12 +96,15 @@ public class KBController {
 		case "failure":
 			res = bxPut(bx, param, view);
 			break;
-		case "autoscaling":
+		case "autoScaling":
 			res = bxPut(bx, param, view);
 			if (!res) break;
 			res = bxPut("autoscalingFailure", param, "");
 			break;
 		case "firewall":
+			res = bxPut(bx, param, view);
+			break;
+		case "execution":
 			res = bxPut(bx, param, view);
 			break;
 		default:
