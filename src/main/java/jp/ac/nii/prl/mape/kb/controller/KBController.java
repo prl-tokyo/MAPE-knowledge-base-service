@@ -145,7 +145,7 @@ public class KBController {
 		
 		logger.info("Updating source");
 		
-		Path path = Paths.get(haskellProperties.getJsonPath() + "source.json");
+		Path path = Paths.get(haskellProperties.getJsonPath() + "/source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
