@@ -6,7 +6,7 @@ jdk:
 - oraclejdk8
 install:
 - mvn -N io.takari:maven:wrapper
-- ./mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 notifications:
   slack:
     secure: TqSMa9hnBQdjZEpSx7apiHHlnUWukFeDmdGD20JPri+mNc07oNs+O38V++4L8gZa7QPrwILsVbyf5Z7cnEIJPTQilSeCFnSVq7kxSAnutuKIrazgctVRHNhN7AQ9JwJh/uTKvfMbjLeVPtge7jXadmky1AJzvJFoIbINC/gs1t9+4hq8gtv1zD585BVBZdoREHcPjc9qWzqGdef8YMS01PFCHbzDKeH2AX2WrCzPQ/4HnrUJmRXCT0XLlCAWxEnESSzyM1Izfm++avLnHYD9ntvhKxvjoHlZUzrQqP1VIr91MlZ1Nao4bHedP4gUEPo6yylhgrv10iDIMQj2nZtXO765dGVnvnUFbHTWrgaAiWmzp8oBfzsLmYZfObeRdwc3ePaBDDvfaNkRv0j2hJyGfxI1dOcXmbK4H/bhXilat1hp5bPKOTWNeA1eAAy79cgV4GXlE8TtiAYO0FSwsjYNNVciayz69ya9480NMdGD5C3jilBK+MEGgmalnwvJvZFE26iHXSkg+DBT7imT+1agzixu296yHxqU8d0cWzUejlD152D/VlKpdp7P3e37OmqTU8D0mc0pPt82KLnm2sOC0ajz0LQcd3/0e6nrjqVMnEOojGSARswZ73Ccv9lF+7dq+qjq/z0FVFwwmkcx1SjiOqW6YVaMejgKQqVB1ORL7ro=
