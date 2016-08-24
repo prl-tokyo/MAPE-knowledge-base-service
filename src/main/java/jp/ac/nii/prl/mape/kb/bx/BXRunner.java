@@ -24,10 +24,10 @@ public class BXRunner {
 	Logger logger = LoggerFactory.getLogger(BXRunner.class);
 
 	public synchronized boolean put(String bx, String view, String param, 
-			String executable, String jsonPath) {
+			String executable, String path) {
 		if (bx != "autoscalingFailure") {
-			Path path = Paths.get(String.format("%s/%s.json", jsonPath, bx));
-			try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+			Path viewPath = Paths.get(String.format("%s/%s.json", path, bx));
+			try (BufferedWriter writer = Files.newBufferedWriter(viewPath)) {
 			writer.write(view);
 			} catch (IOException ex) {
 				return false;
@@ -35,13 +35,13 @@ public class BXRunner {
 		}
 		
 		String cmd = String.format("%s put %s %s", 
-				executable, 
+				path + "/" + executable, 
 				bx,
 				param);
 		System.out.println(cmd);
 		logger.error("Running command " + cmd);
-		ProcessBuilder pb = new ProcessBuilder(executable, "put", bx, param);
-		pb.directory(new File("/Users/lionel/Documents/MAPE-knowledge-base/Haskell"));
+		ProcessBuilder pb = new ProcessBuilder(path + "/" + executable, "put", bx, param);
+		pb.directory(new File(path));
 		Process p;
 		try {
 			p = pb.start();
@@ -65,16 +65,16 @@ public class BXRunner {
 		return true;
 	}
 	
-	public synchronized String get(String bx, String param, String executable, String jsonPath) throws IOException, InterruptedException {
+	public synchronized String get(String bx, String param, String executable, String path) throws IOException, InterruptedException {
 		StringBuilder view = new StringBuilder();
 		System.out.println(param);
 		String cmd = String.format("%s get %s %s", 
-				executable, 
+				path + "/" + executable, 
 				bx, 
 				param);
 		logger.info(String.format("Executing: %s", cmd));
-		ProcessBuilder pb = new ProcessBuilder(executable, "get", bx, param);
-		pb.directory(new File("/Users/lionel/Documents/MAPE-knowledge-base/Haskell"));
+		ProcessBuilder pb = new ProcessBuilder(path + "/" + executable, "get", bx, param);
+		pb.directory(new File(path));
 		Process p = pb.start();
 		p.waitFor();
 		InputStream is = p.getInputStream();
@@ -86,8 +86,8 @@ public class BXRunner {
 			throw new TransformationException("Transformation failed");
 		}
 		logger.info("Transformation completed");
-		Path path = Paths.get(String.format("%s/%s.json",  jsonPath, bx));
-		List<String> allLines = Files.readAllLines(path);
+		Path viewPath = Paths.get(String.format("%s/%s.json",  path, bx));
+		List<String> allLines = Files.readAllLines(viewPath);
 			for (String line:allLines)
 				view.append(line);
 		logger.info("View read");

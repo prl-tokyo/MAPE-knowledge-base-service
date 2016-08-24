@@ -9,28 +9,28 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("app.haskell")
 @Component
 public class HaskellProperties {
-
+	
 	@NotEmpty
 	@Valid
 	private String executable = "";
 	
 	@NotEmpty
 	@Valid
-	private String jsonPath = "";
-	
+	private String path = "";
+
 	public String getExecutable() {
 		return executable;
 	}
-
-	public String getJsonPath() {
-		return jsonPath;
+	
+	public String getPath() {
+		return path;
 	}
 
 	public void setExecutable(String executable) {
 		this.executable = executable;
 	}
 
-	public void setJsonPath(String jsonPath) {
-		this.jsonPath = jsonPath;
+	public void setPath(String path) {
+		this.path = path;
 	}
 }

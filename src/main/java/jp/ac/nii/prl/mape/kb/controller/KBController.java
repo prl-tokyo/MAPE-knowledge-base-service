@@ -72,7 +72,7 @@ public class KBController {
 		String view;
 		try {
 			view = bxRunner.get(bx,  param, 
-					haskellProperties.getExecutable(), haskellProperties.getJsonPath());
+					haskellProperties.getExecutable(), haskellProperties.getPath());
 		} catch (IOException | InterruptedException e) {
 			logger.error("Error in GET transformation " + bx);
 			throw new TransformationException("Error in GET transformation");
@@ -131,7 +131,7 @@ public class KBController {
 			
 		}
 		
-		if (!bxRunner.put(bx, view, param, haskellProperties.getExecutable(), haskellProperties.getJsonPath())) {
+		if (!bxRunner.put(bx, view, param, haskellProperties.getExecutable(), haskellProperties.getPath())) {
 			return false;
 		}
 		
@@ -145,7 +145,7 @@ public class KBController {
 		
 		logger.info("Updating source");
 		
-		Path path = Paths.get(haskellProperties.getJsonPath() + "/source.json");
+		Path path = Paths.get(haskellProperties.getPath() + "/source.json");
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(source);
 		} catch (IOException ex) {
